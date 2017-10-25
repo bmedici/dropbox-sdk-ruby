@@ -131,6 +131,23 @@ module Dropbox
       resp['entries'].map { |e| parse_tagged_response(e) }
     end
 
+    # Get the full contents of a folder (recursively), starting from cursor if provided
+    #
+    # @param [String] path
+    # @param [String] cursor
+    # @return [String] cursor, [Boolean] has_more, [Array<Dropbox::Metadata>]
+    def list_recursive path, cursor = nil
+      # puts "cursor[cursor.inspect] > empty[#{cursor.to_s.empty?}]"
+      if cursor.to_s.blank?
+        puts "list_recursive: first > list_folder"
+        resp = request('/files/list_folder', path: path, recursive: true)
+      else
+        puts "list_recursive: cursor > list_folder/continue"
+        resp = request('/files/list_folder/continue', cursor: cursor)
+      end
+      return resp['cursor'], resp['has_more'], resp['entries'].map { |e| parse_tagged_response(e) }
+    end
+  
     # Get the contents of a folder that are after a cursor.
     #
     # @param [String] cursor
